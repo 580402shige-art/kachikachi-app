@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="カチカチくん">
+<title>カチカチくん - パチスロ設定推測</title>
+<style>
+*{-webkit-box-sizing:border-box;box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow-x:hidden;}
+body{background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans','Hiragino Kaku Gothic ProN',Meiryo,sans-serif;font-size:14px;min-height:100vh;padding-bottom:64px;-webkit-text-size-adjust:100%;}
+/* ヘッダー */
+.header{background:#1a1a1a;padding:8px 10px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;border-bottom:1px solid #2a2a2a;position:-webkit-sticky;position:sticky;top:0;z-index:100;}
+.header-title{font-size:15px;font-weight:bold;-webkit-box-flex:1;-webkit-flex:1;flex:1;text-align:center;color:#f0a500;}
+.btn-icon{background:none;border:none;color:#888;font-size:18px;padding:4px 8px;cursor:pointer;border-radius:50%;width:36px;height:36px;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;}
+.btn-icon:active{background:#333;}
+/* 機種セレクト */
+.machine-bar{background:#1a1a1a;padding:6px 10px 8px;}
+.machine-select{width:100%;background:#222;color:#fff;border:1px solid #333;padding:10px 12px;font-size:14px;border-radius:8px;-webkit-appearance:none;-moz-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23888' fill='none' stroke-width='2'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;}
+/* ゲーム数エリア */
+.games-area{background:#1e1e1e;margin:6px 8px;border-radius:10px;overflow:hidden;border:1px solid #2a2a2a;}
+.games-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;padding:10px 12px;border-bottom:1px solid #2a2a2a;}
+.games-row:last-child{border-bottom:none;}
+.games-label{-webkit-box-flex:1;-webkit-flex:1;flex:1;color:#999;font-size:13px;}
+.games-input{background:#2a2a2a;color:#fff;border:1px solid #333;text-align:right;font-size:16px;font-weight:bold;width:100px;padding:6px 10px;border-radius:6px;}
+.games-self{color:#999;font-size:13px;-webkit-box-flex:1;-webkit-flex:1;flex:1;}
+.games-btns{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;}
+.games-btns .btn-pm{margin-left:6px;}
+.btn-pm{background:#2a2a2a;color:#fff;border:1px solid #444;width:34px;height:34px;border-radius:8px;font-size:18px;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;}
+.btn-pm:active{background:#444;}
+.btn-pm.plus{background:#f0a500;color:#000;border-color:#f0a500;font-weight:bold;}
+/* 減算トグル */
+.sub-toggle{background:#1e1e1e;margin:0 8px 6px;border-radius:10px;padding:10px 12px;border:1px solid #2a2a2a;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;}
+.sub-toggle-label{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;color:#e74c3c;font-size:13px;font-weight:bold;}
+.sub-toggle-label .icon{width:22px;height:22px;border-radius:50%;background:#e74c3c;color:#fff;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;margin-right:8px;font-size:14px;font-weight:bold;}
+.toggle-switch{position:relative;width:44px;height:24px;background:#444;border-radius:12px;cursor:pointer;-webkit-transition:background 0.2s;transition:background 0.2s;}
+.toggle-switch.on{background:#4cd964;}
+.toggle-knob{position:absolute;top:2px;left:2px;width:20px;height:20px;background:#fff;border-radius:50%;-webkit-transition:left 0.2s;transition:left 0.2s;}
+.toggle-switch.on .toggle-knob{left:22px;}
+/* 小役カウントエリア */
+.roles-area{background:#1e1e1e;margin:6px 8px;border-radius:10px;padding:10px;border:1px solid #2a2a2a;}
+.roles-title{color:#888;font-size:11px;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;}
+.roles-grid{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;margin:-4px;}
+.role-card{width:31.33%;margin:1%;background:#252525;border-radius:12px;padding:8px 4px;text-align:center;position:relative;cursor:pointer;-webkit-user-select:none;user-select:none;border:1px solid #333;-webkit-transition:opacity 0.1s;transition:opacity 0.1s;}
+.role-card:active{opacity:0.6;-webkit-transform:scale(0.96);transform:scale(0.96);}
+.role-rate{font-size:10px;color:#888;margin-bottom:2px;min-height:13px;}
+.role-count{font-size:28px;font-weight:bold;line-height:1.2;margin-bottom:4px;}
+.role-block{width:42px;height:42px;border-radius:10px;margin:4px auto;}
+.role-name{font-size:10px;color:#aaa;margin-top:2px;}
+.role-minus{position:absolute;top:4px;left:4px;background:rgba(231,76,60,0.8);color:#fff;border:none;width:18px;height:18px;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;}
+/* 判別ボタン */
+.judge-btn{display:block;width:-webkit-calc(100% - 16px);width:calc(100% - 16px);margin:10px 8px 6px;padding:14px;background:linear-gradient(135deg,#f0a500,#e8920a);color:#000;border:none;border-radius:10px;font-size:17px;font-weight:bold;cursor:pointer;letter-spacing:3px;text-align:center;-webkit-box-shadow:0 2px 8px rgba(240,165,0,0.3);box-shadow:0 2px 8px rgba(240,165,0,0.3);}
+.judge-btn:active{background:#d4920a;-webkit-transform:scale(0.98);transform:scale(0.98);}
+.reset-btn{display:block;width:-webkit-calc(100% - 16px);width:calc(100% - 16px);margin:0 8px 8px;padding:10px;background:#1e1e1e;color:#888;border:1px solid #333;border-radius:10px;font-size:13px;cursor:pointer;text-align:center;}
+/* ボトムナビ */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#1a1a1a;border-top:1px solid #2a2a2a;display:-webkit-box;display:-webkit-flex;display:flex;height:56px;z-index:100;}
+.nav-item{-webkit-box-flex:1;-webkit-flex:1;flex:1;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;cursor:pointer;color:#555;font-size:9px;border:none;background:none;padding:4px 0;}
+.nav-item.active{color:#f0a500;}
+.nav-icon{font-size:20px;margin-bottom:2px;}
+/* 判別結果画面 */
+.result-screen{display:none;padding:8px;}
+.result-header{background:#1e1e1e;border-radius:10px;padding:14px;margin-bottom:8px;text-align:center;border:1px solid #2a2a2a;}
+.result-machine{color:#888;font-size:12px;}
+.result-title{font-size:18px;font-weight:bold;margin-top:4px;color:#f0a500;}
+.result-bars{background:#1e1e1e;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #2a2a2a;}
+.setting-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;margin-bottom:10px;}
+.setting-row:last-child{margin-bottom:0;}
+.setting-check{color:#4a9eff;margin-right:6px;font-size:13px;}
+.setting-label{width:44px;font-size:13px;font-weight:bold;}
+.bar-wrap{-webkit-box-flex:1;-webkit-flex:1;flex:1;background:#2a2a2a;border-radius:4px;height:20px;margin:0 8px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;-webkit-transition:width 0.5s ease;transition:width 0.5s ease;}
+.bar-s1{background:#e74c3c;}
+.bar-s2{background:#666;}
+.bar-s3{background:#666;}
+.bar-s4{background:#666;}
+.bar-s5{background:#666;}
+.bar-s6{background:#3498db;}
+.bar-best{background:#f0a500 !important;}
+.setting-pct{width:70px;text-align:right;font-size:14px;font-weight:bold;}
+.pct-s1{color:#e74c3c;}
+.pct-s6{color:#3498db;}
+.pct-best{color:#f0a500 !important;}
+/* グループ表示 */
+.group-area{margin-bottom:8px;}
+.group-row{display:-webkit-box;display:-webkit-flex;display:flex;margin-bottom:6px;}
+.group-box{-webkit-box-flex:1;-webkit-flex:1;flex:1;background:#1e1e1e;border-radius:8px;padding:12px 8px;text-align:center;border:1px solid #2a2a2a;margin:0 3px;}
+.group-box:first-child{margin-left:0;}
+.group-box:last-child{margin-right:0;}
+.group-title{color:#888;font-size:10px;margin-bottom:4px;}
+.group-label{font-size:11px;margin-bottom:4px;color:#ccc;}
+.group-pct{font-size:20px;font-weight:bold;}
+.group-pct.low{color:#e74c3c;}
+.group-pct.high{color:#3498db;}
+.group-pct.odd{color:#e74c3c;}
+.group-pct.even{color:#3498db;}
+/* 期待値 */
+.ev-area{background:#1e1e1e;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #2a2a2a;}
+.ev-title{font-size:13px;font-weight:bold;margin-bottom:10px;color:#f0a500;}
+.ev-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;padding:8px 0;border-bottom:1px solid #2a2a2a;font-size:13px;}
+.ev-row:last-child{border-bottom:none;}
+.ev-val{font-weight:bold;color:#fff;}
+/* データ画面 */
+.data-screen{display:none;padding:8px;}
+.data-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;background:#1e1e1e;border-radius:10px;margin-bottom:8px;border:1px solid #2a2a2a;}
+.data-table{width:100%;border-collapse:collapse;font-size:11px;}
+.data-table th{background:#252525;padding:6px 4px;text-align:center;white-space:nowrap;border:1px solid #333;color:#f0a500;font-size:10px;}
+.data-table td{padding:5px 4px;text-align:center;border:1px solid #2a2a2a;white-space:nowrap;color:#ccc;}
+.data-table tr:nth-child(even){background:#1a1a1a;}
+.data-source{color:#555;font-size:10px;text-align:right;padding:4px 8px;}
+/* 戻るボタン */
+.back-btn{background:#252525;color:#f0a500;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;margin-bottom:8px;}
+.back-btn:active{background:#333;}
+/* 設定画面 */
+.settings-screen{display:none;padding:8px;}
+.settings-section{background:#1e1e1e;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #2a2a2a;}
+.settings-title{color:#f0a500;font-size:13px;font-weight:bold;margin-bottom:8px;}
+.settings-info{color:#888;font-size:12px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="header">
+  <button class="btn-icon" onclick="resetAll()">&#128465;</button>
+  <div class="header-title" id="header-title">カチカチくん</div>
+  <div style="width:36px;"></div>
+</div>
+
+<!-- カウンター画面 -->
+<div id="counter-screen">
+  <!-- 機種選択 -->
+  <div class="machine-bar">
+    <select class="machine-select" id="machine-select" onchange="onMachineChange()">
+      <optgroup label="ジャグラー系">
+        <option value="aim_ex">アイムジャグラーEX</option>
+        <option value="my_v">マイジャグラーV</option>
+        <option value="funky2">ファンキージャグラー2</option>
+        <option value="happy8">ハッピージャグラーVIII</option>
+        <option value="gogo3">ゴーゴージャグラー3</option>
+        <option value="juggler_girls_ss">ジャグラーガールズSS</option>
+        <option value="mister">ミスタージャグラー</option>
+        <option value="ultra_miracle">ウルトラミラクルジャグラー</option>
+      </optgroup>
+      <optgroup label="ハナハナ系">
+        <option value="s_king_hana">Sキングハナハナ</option>
+        <option value="newking_v">ニューキングハナハナV</option>
+        <option value="dragon_hana">ドラゴンハナハナ閃光</option>
+        <option value="houou_tensho">ハナハナホウオウ天翔</option>
+        <option value="star_hana">スターハナハナ</option>
+      </optgroup>
+      <optgroup label="ノーマル系">
+        <option value="shin_hanabi">新ハナビ</option>
+      </optgroup>
+    </select>
+  </div>
+
+  <!-- ゲーム数 -->
+  <div class="games-area">
+    <div class="games-row">
+      <span class="games-label">開始ゲーム数</span>
+      <input class="games-input" type="number" id="start-games" value="0" min="0" oninput="updateSelf()">
+    </div>
+    <div class="games-row">
+      <span class="games-label">総合ゲーム数</span>
+      <input class="games-input" type="number" id="total-games" value="0" min="0" oninput="updateSelf()">
+    </div>
+    <div class="games-row">
+      <span class="games-self" id="self-games-label">自己ゲーム: 0</span>
+      <div class="games-btns">
+        <button class="btn-pm" onclick="addGames(-10)">-</button>
+        <button class="btn-pm plus" onclick="addGames(10)">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 減算モード -->
+  <div class="sub-toggle">
+    <div class="sub-toggle-label">
+      <span class="icon">-</span>
+      <span>減算モード</span>
+    </div>
+    <div class="toggle-switch" id="sub-toggle" onclick="toggleSubMode()">
+      <div class="toggle-knob"></div>
+    </div>
+  </div>
+
+  <!-- 小役カード -->
+  <div class="roles-area">
+    <div class="roles-title">小役カウント</div>
+    <div class="roles-grid" id="roles-grid"></div>
+  </div>
+
+  <!-- 判別ボタン -->
+  <button class="judge-btn" onclick="showResult()">判　別</button>
+  <button class="reset-btn" onclick="resetCounts()">カウントリセット</button>
+</div>
+
+<!-- 判別結果画面 -->
+<div id="result-screen" class="result-screen">
+  <button class="back-btn" onclick="showScreen('counter')">&#9664; 戻る</button>
+  <div class="result-header">
+    <div class="result-machine" id="result-machine-name"></div>
+    <div class="result-title">判別結果</div>
+  </div>
+  <div class="result-bars" id="result-bars"></div>
+  <div class="group-area" id="group-area"></div>
+  <div class="ev-area" id="ev-area"></div>
+</div>
+
+<!-- 機種データ画面 -->
+<div id="data-screen" class="data-screen">
+  <button class="back-btn" onclick="showScreen('counter')">&#9664; 戻る</button>
+  <div id="data-content"></div>
+  <div class="data-source">データ出典: kenslo65536.com / 各種解析サイト</div>
+</div>
+
+<!-- 設定画面 -->
+<div id="settings-screen" class="settings-screen">
+  <button class="back-btn" onclick="showScreen('counter')">&#9664; 戻る</button>
+  <div class="settings-section">
+    <div class="settings-title">アプリ情報</div>
+    <div class="settings-info">
+      カチカチくん v1.0<br>
+      パチスロ設定推測ツール<br><br>
+      対応機種: 14機種<br>
+      計算方式: ベイズ推定（対数尤度）<br><br>
+      オフライン動作対応<br>
+      データはLocalStorageに保存されます
+    </div>
+  </div>
+  <div class="settings-section">
+    <div class="settings-title">使い方</div>
+    <div class="settings-info">
+      1. 機種を選択<br>
+      2. ゲーム数を入力<br>
+      3. 小役カードをタップしてカウント<br>
+      4.「判別」ボタンで設定推測<br><br>
+      ※入力した小役のみで計算します<br>
+      ※カウント0の小役は無視されます
+    </div>
+  </div>
+</div>
+
+<!-- ボトムナビ -->
+<div class="bottom-nav">
+  <button class="nav-item active" id="nav-counter" onclick="showScreen('counter')">
+    <span class="nav-icon">&#8862;</span><span>カウンター</span>
+  </button>
+  <button class="nav-item" id="nav-result" onclick="showResult()">
+    <span class="nav-icon">&#9878;</span><span>設定判別</span>
+  </button>
+  <button class="nav-item" id="nav-data" onclick="showScreen('data')">
+    <span class="nav-icon">&#9638;</span><span>データ</span>
+  </button>
+  <button class="nav-item" id="nav-settings" onclick="showScreen('settings')">
+    <span class="nav-icon">&#9881;</span><span>設定</span>
+  </button>
+</div>
+
+<script>
+// =====================
+// 機種データ（kenslo65536.com より）
+// =====================
+var MACHINES = {
+  aim_ex: {
+    name:"アイムジャグラーEX", genre:"juggler",
+    roles:["big","reg","budou","cherry","bell","piero"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",budou:"#8e44ad",cherry:"#c0392b",bell:"#f39c12",piero:"#e91e63"},
+    roleLabels:{big:"BIG",reg:"REG",budou:"ブドウ",cherry:"チェリー",bell:"ベル",piero:"ピエロ"},
+    settings:[
+      {big:273.07,reg:439.84,budou:6.024,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:269.70,reg:399.61,budou:6.024,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:269.70,reg:330.99,budou:6.024,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:259.04,reg:315.08,budou:6.024,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:259.04,reg:255.00,budou:6.024,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:255.00,reg:255.00,budou:5.848,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27}
+    ],
+    payout:[97,99,101,103,106,109]
+  },
+  my_v: {
+    name:"マイジャグラーV", genre:"juggler",
+    roles:["big","reg","budou","cherry","bell","piero"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",budou:"#8e44ad",cherry:"#c0392b",bell:"#f39c12",piero:"#e91e63"},
+    roleLabels:{big:"BIG",reg:"REG",budou:"ブドウ",cherry:"チェリー",bell:"ベル",piero:"ピエロ"},
+    settings:[
+      {big:273.07,reg:409.60,budou:5.910,replay:7.298,cherry:35.851,bell:1024.00,piero:1024.00},
+      {big:270.81,reg:385.51,budou:5.870,replay:7.298,cherry:35.851,bell:1024.00,piero:1024.00},
+      {big:266.41,reg:336.08,budou:5.830,replay:7.298,cherry:34.657,bell:1024.00,piero:1024.00},
+      {big:254.02,reg:289.98,budou:5.800,replay:7.298,cherry:33.574,bell:1024.00,piero:1024.00},
+      {big:240.06,reg:268.59,budou:5.760,replay:7.298,cherry:33.352,bell:1024.00,piero:1024.00},
+      {big:229.15,reg:229.15,budou:5.670,replay:7.298,cherry:33.032,bell:1024.00,piero:1024.00}
+    ],
+    payout:[97,99,101,104,106,109]
+  },
+  funky2: {
+    name:"ファンキージャグラー2", genre:"juggler",
+    roles:["big","reg","budou","cherry","bell","piero"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",budou:"#8e44ad",cherry:"#c0392b",bell:"#f39c12",piero:"#e91e63"},
+    roleLabels:{big:"BIG",reg:"REG",budou:"ブドウ",cherry:"チェリー",bell:"ベル",piero:"ピエロ"},
+    settings:[
+      {big:266.41,reg:439.84,budou:5.940,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:259.04,reg:407.06,budou:5.930,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:256.00,reg:366.12,budou:5.880,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:249.19,reg:322.84,budou:5.830,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:240.06,reg:299.25,budou:5.800,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27},
+      {big:219.92,reg:262.14,budou:5.770,replay:7.298,cherry:35.617,bell:1092.27,piero:1092.27}
+    ],
+    payout:[97,99,101,104,106,109]
+  },
+  happy8: {
+    name:"ハッピージャグラーVIII", genre:"juggler",
+    roles:["big","reg","budou","cherry","bell","piero"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",budou:"#8e44ad",cherry:"#c0392b",bell:"#f39c12",piero:"#e91e63"},
+    roleLabels:{big:"BIG",reg:"REG",budou:"ブドウ",cherry:"チェリー",bell:"ベル",piero:"ピエロ"},
+    settings:[
+      {big:273.07,reg:397.19,budou:6.040,replay:7.298,cherry:56.550,bell:655.36,piero:655.36},
+      {big:270.81,reg:362.08,budou:6.010,replay:7.298,cherry:56.550,bell:655.36,piero:655.36},
+      {big:263.20,reg:332.67,budou:5.980,replay:7.298,cherry:56.550,bell:655.36,piero:655.36},
+      {big:254.02,reg:300.62,budou:5.860,replay:7.298,cherry:56.550,bell:655.36,piero:655.36},
+      {big:239.18,reg:273.07,budou:5.840,replay:7.298,cherry:56.550,bell:655.36,piero:655.36},
+      {big:225.99,reg:256.00,budou:5.820,replay:7.298,cherry:56.550,bell:655.36,piero:655.36}
+    ],
+    payout:[97,99,101,104,106,109]
+  },
+  gogo3: {
+    name:"ゴーゴージャグラー3", genre:"juggler",
+    roles:["big","reg","budou","cherry","bell","piero"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",budou:"#8e44ad",cherry:"#c0392b",bell:"#f39c12",piero:"#e91e63"},
+    roleLabels:{big:"BIG",reg:"REG",budou:"ブドウ",cherry:"チェリー",bell:"ベル",piero:"ピエロ"},
+    settings:[
+      {big:259.04,reg:354.25,budou:6.250,replay:7.298,cherry:33.400,bell:1092.27,piero:1092.27},
+      {big:258.02,reg:332.67,budou:6.200,replay:7.298,cherry:33.300,bell:1092.27,piero:1092.27},
+      {big:257.00,reg:306.24,budou:6.150,replay:7.298,cherry:33.200,bell:1092.27,piero:1092.27},
+      {big:254.02,reg:268.59,budou:6.070,replay:7.298,cherry:33.100,bell:1092.27,piero:1092.27},
+      {big:247.31,reg:247.31,budou:6.000,replay:7.298,cherry:32.900,bell:1092.27,piero:1092.27},
+      {big:234.90,reg:234.90,budou:5.920,replay:7.298,cherry:32.800,bell:1092.27,piero:1092.27}
+    ],
+    payout:[97,99,101,104,107,109]
+  },
+  juggler_girls_ss: {
+    name:"ジャグラーガールズSS", genre:"juggler",
+    roles:["big","reg","budou","cherry","bell","piero"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",budou:"#8e44ad",cherry:"#c0392b",bell:"#f39c12",piero:"#e91e63"},
+    roleLabels:{big:"BIG",reg:"REG",budou:"ブドウ",cherry:"チェリー",bell:"ベル",piero:"ピエロ"},
+    settings:[
+      {big:273.07,reg:381.02,budou:6.010,replay:7.298,cherry:33.608,bell:1092.27,piero:1092.27},
+      {big:270.81,reg:350.46,budou:6.010,replay:7.298,cherry:33.505,bell:1092.27,piero:1092.27},
+      {big:260.06,reg:316.60,budou:6.010,replay:7.298,cherry:33.301,bell:1092.27,piero:1092.27},
+      {big:250.14,reg:281.27,budou:6.010,replay:7.298,cherry:33.200,bell:1092.27,piero:1092.27},
+      {big:243.63,reg:270.81,budou:5.920,replay:7.298,cherry:33.099,bell:1092.27,piero:1092.27},
+      {big:225.99,reg:252.06,budou:5.890,replay:7.298,cherry:32.900,bell:1092.27,piero:1092.27}
+    ],
+    payout:[97,99,101,104,106,109]
+  },
+  mister: {
+    name:"ミスタージャグラー", genre:"juggler",
+    roles:["big","reg","budou","cherry","bell","piero"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",budou:"#8e44ad",cherry:"#c0392b",bell:"#f39c12",piero:"#e91e63"},
+    roleLabels:{big:"BIG",reg:"REG",budou:"ブドウ",cherry:"チェリー",bell:"ベル",piero:"ピエロ"},
+    settings:[
+      {big:268.59,reg:374.49,budou:6.207,replay:7.298,cherry:40.000,bell:655.36,piero:1024.00},
+      {big:267.49,reg:354.25,budou:6.154,replay:7.298,cherry:39.500,bell:655.36,piero:1024.00},
+      {big:260.06,reg:330.99,budou:6.111,replay:7.298,cherry:39.000,bell:655.36,piero:1024.00},
+      {big:249.19,reg:291.27,budou:6.076,replay:7.298,cherry:38.500,bell:655.36,piero:1024.00},
+      {big:240.94,reg:257.00,budou:6.043,replay:7.298,cherry:38.000,bell:655.36,piero:1024.00},
+      {big:237.45,reg:237.45,budou:6.005,replay:7.298,cherry:37.500,bell:655.36,piero:1024.00}
+    ],
+    payout:[97,99,101,104,106,109]
+  },
+  ultra_miracle: {
+    name:"ウルトラミラクルジャグラー", genre:"juggler",
+    roles:["big","reg","budou","cherry","bell","piero"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",budou:"#8e44ad",cherry:"#c0392b",bell:"#f39c12",piero:"#e91e63"},
+    roleLabels:{big:"BIG",reg:"REG",budou:"ブドウ",cherry:"チェリー",bell:"ベル",piero:"ピエロ"},
+    settings:[
+      {big:267.49,reg:425.56,budou:5.940,replay:7.298,cherry:35.540,bell:1024.00,piero:1024.00},
+      {big:261.10,reg:402.06,budou:5.938,replay:7.298,cherry:35.540,bell:1024.00,piero:1024.00},
+      {big:256.00,reg:350.46,budou:5.936,replay:7.298,cherry:34.860,bell:1024.00,piero:1024.00},
+      {big:242.73,reg:322.84,budou:5.934,replay:7.298,cherry:34.790,bell:1024.00,piero:1024.00},
+      {big:233.22,reg:297.89,budou:5.933,replay:7.298,cherry:34.130,bell:1024.00,piero:1024.00},
+      {big:216.29,reg:277.69,budou:5.929,replay:7.298,cherry:33.440,bell:1024.00,piero:1024.00}
+    ],
+    payout:[97,99,101,104,107,109]
+  },
+  s_king_hana: {
+    name:"Sキングハナハナ", genre:"hana",
+    roles:["big","reg","bell","cherry","suika"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",bell:"#f39c12",cherry:"#c0392b",suika:"#27ae60"},
+    roleLabels:{big:"BIG",reg:"REG",bell:"ベル",cherry:"チェリー",suika:"スイカ"},
+    settings:[
+      {big:292,reg:489,bell:7.24,replay:7.30,cherry:64.0,suika:240.0},
+      {big:280,reg:452,bell:7.23,replay:7.30,cherry:64.0,suika:240.0},
+      {big:268,reg:420,bell:7.13,replay:7.30,cherry:64.0,suika:240.0},
+      {big:257,reg:390,bell:7.09,replay:7.30,cherry:64.0,suika:240.0},
+      {big:244,reg:360,bell:7.03,replay:7.30,cherry:64.0,suika:240.0},
+      {big:232,reg:332,bell:7.00,replay:7.30,cherry:64.0,suika:240.0}
+    ],
+    payout:[97,99,101,104,107,110]
+  },
+  newking_v: {
+    name:"ニューキングハナハナV", genre:"hana",
+    settingLabels:["設定1","設定2","設定3","設定4","設定V"],
+    settingNums:[1,2,3,4,5],
+    roles:["big","reg","bell","cherry","suika"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",bell:"#f39c12",cherry:"#c0392b",suika:"#27ae60"},
+    roleLabels:{big:"BIG",reg:"REG",bell:"ベル",cherry:"チェリー",suika:"スイカ"},
+    settings:[
+      {big:299.25,reg:496.48,bell:7.59,replay:7.32,cherry:47.44,suika:160.0},
+      {big:291.27,reg:471.48,bell:7.47,replay:7.32,cherry:47.44,suika:160.0},
+      {big:281.27,reg:442.81,bell:7.44,replay:7.32,cherry:47.44,suika:160.0},
+      {big:268.59,reg:409.60,bell:7.35,replay:7.32,cherry:47.44,suika:160.0},
+      {big:253.03,reg:372.36,bell:7.24,replay:7.32,cherry:47.44,suika:160.0}
+    ],
+    payout:[97,99,101,104,108]
+  },
+  dragon_hana: {
+    name:"ドラゴンハナハナ閃光", genre:"hana",
+    roles:["big","reg","bell","cherry","suika"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",bell:"#f39c12",cherry:"#c0392b",suika:"#27ae60"},
+    roleLabels:{big:"BIG",reg:"REG",bell:"ベル",cherry:"チェリー",suika:"スイカ"},
+    settings:[
+      {big:256,reg:642,bell:7.13,replay:7.30,cherry:48.7,suika:159.8},
+      {big:246,reg:585,bell:7.09,replay:7.30,cherry:48.7,suika:159.8},
+      {big:235,reg:537,bell:7.09,replay:7.30,cherry:48.7,suika:159.8},
+      {big:224,reg:489,bell:7.02,replay:7.30,cherry:48.7,suika:159.8},
+      {big:212,reg:442,bell:6.97,replay:7.30,cherry:48.7,suika:159.8},
+      {big:199,reg:399,bell:6.97,replay:7.30,cherry:48.7,suika:159.8}
+    ],
+    payout:[97,99,101,104,107,110]
+  },
+  houou_tensho: {
+    name:"ハナハナホウオウ天翔", genre:"hana",
+    roles:["big","reg","bell","cherry","suika"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",bell:"#f39c12",cherry:"#c0392b",suika:"#27ae60"},
+    roleLabels:{big:"BIG",reg:"REG",bell:"ベル",cherry:"チェリー",suika:"スイカ"},
+    settings:[
+      {big:297,reg:496,bell:7.50,replay:7.30,cherry:48.0,suika:160.0},
+      {big:284,reg:458,bell:7.45,replay:7.30,cherry:48.0,suika:160.0},
+      {big:273,reg:425,bell:7.40,replay:7.30,cherry:48.0,suika:160.0},
+      {big:262,reg:397,bell:7.35,replay:7.30,cherry:48.0,suika:160.0},
+      {big:249,reg:366,bell:7.30,replay:7.30,cherry:48.0,suika:160.0},
+      {big:236,reg:337,bell:7.20,replay:7.30,cherry:48.0,suika:160.0}
+    ],
+    payout:[97,99,101,103,106,109]
+  },
+  star_hana: {
+    name:"スターハナハナ", genre:"hana",
+    roles:["big","reg","bell","cherry","suika"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",bell:"#f39c12",cherry:"#c0392b",suika:"#27ae60"},
+    roleLabels:{big:"BIG",reg:"REG",bell:"ベル",cherry:"チェリー",suika:"スイカ"},
+    settings:[
+      {big:270,reg:387,bell:6.22,replay:7.30,cherry:48.7,suika:159.8},
+      {big:262,reg:354,bell:6.17,replay:7.30,cherry:48.7,suika:159.8},
+      {big:252,reg:322,bell:6.17,replay:7.30,cherry:48.7,suika:159.8},
+      {big:240,reg:293,bell:6.13,replay:7.30,cherry:48.7,suika:159.8},
+      {big:229,reg:267,bell:6.08,replay:7.30,cherry:48.7,suika:159.8},
+      {big:218,reg:242,bell:6.08,replay:7.30,cherry:48.7,suika:159.8}
+    ],
+    payout:[97,99,101,104,107,110]
+  },
+  shin_hanabi: {
+    name:"新ハナビ", genre:"normal",
+    settingLabels:["設定1","設定2","設定5","設定6"],
+    settingNums:[1,2,5,6],
+    roles:["big","reg","furin_a","furin_b","koori_a","cherry_a2"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",furin_a:"#f39c12",furin_b:"#e67e22",koori_a:"#3498db",cherry_a2:"#c0392b"},
+    roleLabels:{big:"BIG",reg:"REG",furin_a:"風鈴A",furin_b:"風鈴B",koori_a:"氷A",cherry_a2:"チェリーA2"},
+    settings:[
+      {big:277.7,reg:356.2,furin_a:15.3,furin_b:15.3,koori_a:52.9,cherry_a2:21.0},
+      {big:268.6,reg:331.0,furin_a:14.9,furin_b:15.6,koori_a:53.5,cherry_a2:19.3},
+      {big:256.0,reg:306.2,furin_a:14.5,furin_b:15.3,koori_a:49.6,cherry_a2:20.6},
+      {big:248.2,reg:280.1,furin_a:14.1,furin_b:15.1,koori_a:50.8,cherry_a2:19.9}
+    ],
+    payout:[102,104,106.5,109]
+  }
+};
+
+// =====================
+// 状態管理
+// =====================
+var state = {
+  machineId: "aim_ex",
+  startGames: 0,
+  totalGames: 0,
+  counts: {},
+  subMode: false
+};
+
+function loadState() {
+  try {
+    var s = localStorage.getItem("kachikachi_state_v2");
+    if (s) { state = JSON.parse(s); }
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem("kachikachi_state_v2", JSON.stringify(state)); } catch(e) {}
+}
+
+// =====================
+// 初期化
+// =====================
+window.onload = function() {
+  loadState();
+  // 機種IDが存在しない場合のフォールバック
+  if (!MACHINES[state.machineId]) { state.machineId = "aim_ex"; }
+  document.getElementById("machine-select").value = state.machineId;
+  document.getElementById("start-games").value = state.startGames || 0;
+  document.getElementById("total-games").value = state.totalGames || 0;
+  document.getElementById("header-title").textContent = MACHINES[state.machineId].name;
+  if (state.subMode) {
+    document.getElementById("sub-toggle").className = "toggle-switch on";
+  }
+  updateSelf();
+  buildRoleCards();
+};
+
+function onMachineChange() {
+  state.machineId = document.getElementById("machine-select").value;
+  state.counts = {};
+  saveState();
+  buildRoleCards();
+  document.getElementById("header-title").textContent = MACHINES[state.machineId].name;
+}
+
+function updateSelf() {
+  state.startGames = parseInt(document.getElementById("start-games").value) || 0;
+  state.totalGames = parseInt(document.getElementById("total-games").value) || 0;
+  var g = getSelfGames();
+  document.getElementById("self-games-label").textContent = "自己ゲーム: " + g.toLocaleString();
+  saveState();
+  buildRoleCards();
+}
+
+function addGames(n) {
+  var v = parseInt(document.getElementById("total-games").value) || 0;
+  v += n;
+  if (v < 0) v = 0;
+  document.getElementById("total-games").value = v;
+  updateSelf();
+}
+
+function getSelfGames() {
+  var s = parseInt(document.getElementById("start-games").value) || 0;
+  var t = parseInt(document.getElementById("total-games").value) || 0;
+  var g = t - s;
+  return g > 0 ? g : t;
+}
+
+function toggleSubMode() {
+  state.subMode = !state.subMode;
+  var el = document.getElementById("sub-toggle");
+  el.className = state.subMode ? "toggle-switch on" : "toggle-switch";
+  saveState();
+}
+
+// =====================
+// 小役カード生成
+// =====================
+function buildRoleCards() {
+  var m = MACHINES[state.machineId];
+  var g = getSelfGames();
+  var grid = document.getElementById("roles-grid");
+  grid.innerHTML = "";
+  for (var i = 0; i < m.roles.length; i++) {
+    var role = m.roles[i];
+    var cnt = state.counts[role] || 0;
+    var rate = (g > 0 && cnt > 0) ? "1/" + (g / cnt).toFixed(1) : "1/--";
+    var color = m.roleColors[role] || "#555";
+    var label = m.roleLabels[role] || role;
+    var card = document.createElement("div");
+    card.className = "role-card";
+    card.setAttribute("data-role", role);
+    card.onclick = (function(r){ return function(){ onCardTap(r); }; })(role);
+    card.innerHTML =
+      '<button class="role-minus" onclick="event.stopPropagation();subCount(\''+role+'\')">-</button>' +
+      '<div class="role-rate">' + rate + '</div>' +
+      '<div class="role-count">' + cnt + '</div>' +
+      '<div class="role-block" style="background:' + color + '"></div>' +
+      '<div class="role-name">' + label + '</div>';
+    grid.appendChild(card);
+  }
+}
+
+function onCardTap(role) {
+  if (state.subMode) {
+    subCount(role);
+  } else {
+    addCount(role);
+  }
+}
+
+function addCount(role) {
+  state.counts[role] = (state.counts[role] || 0) + 1;
+  saveState();
+  buildRoleCards();
+}
+function subCount(role) {
+  if ((state.counts[role] || 0) > 0) {
+    state.counts[role]--;
+    saveState();
+    buildRoleCards();
+  }
+}
+function resetCounts() {
+  if (confirm("カウントをリセットしますか？")) {
+    state.counts = {};
+    saveState();
+    buildRoleCards();
+  }
+}
+function resetAll() {
+  if (confirm("全データをリセットしますか？")) {
+    state.counts = {};
+    state.startGames = 0;
+    state.totalGames = 0;
+    document.getElementById("start-games").value = 0;
+    document.getElementById("total-games").value = 0;
+    updateSelf();
+    saveState();
+    buildRoleCards();
+  }
+}
+
+// =====================
+// ベイズ推定（対数尤度）
+// =====================
+function logLikelihood(observed, total, prob) {
+  if (total <= 0) return 0;
+  var p = prob;
+  if (p <= 0) p = 0.000001;
+  if (p >= 1) p = 0.999999;
+  var k = observed;
+  var n = total;
+  return k * Math.log(p) + (n - k) * Math.log(1 - p);
+}
+
+function calcProbabilities() {
+  var m = MACHINES[state.machineId];
+  var g = getSelfGames();
+  var numSettings = m.settings.length;
+  var logLikes = [];
+  for (var s = 0; s < numSettings; s++) {
+    var ll = 0;
+    var sd = m.settings[s];
+    for (var ri = 0; ri < m.roles.length; ri++) {
+      var role = m.roles[ri];
+      var cnt = state.counts[role] || 0;
+      if (cnt <= 0) continue;
+      var denom = sd[role];
+      if (!denom || denom <= 0) continue;
+      var prob = 1 / denom;
+      ll += logLikelihood(cnt, g, prob);
+    }
+    logLikes.push(ll);
+  }
+  var maxLL = logLikes[0];
+  for (var i = 1; i < numSettings; i++) { if (logLikes[i] > maxLL) maxLL = logLikes[i]; }
+  var exps = [];
+  var sumExp = 0;
+  for (var i = 0; i < numSettings; i++) {
+    var e = Math.exp(logLikes[i] - maxLL);
+    exps.push(e);
+    sumExp += e;
+  }
+  var probs = [];
+  for (var i = 0; i < numSettings; i++) { probs.push(exps[i] / sumExp * 100); }
+  return probs;
+}
+
+// =====================
+// 判別結果表示
+// =====================
+function showResult() {
+  var m = MACHINES[state.machineId];
+  var probs = calcProbabilities();
+  var numSettings = m.settings.length;
+  var settingNums = m.settingNums || [1,2,3,4,5,6];
+  var settingLabels = m.settingLabels || ["設定1","設定2","設定3","設定4","設定5","設定6"];
+  var bestIdx = 0;
+  for (var i = 1; i < numSettings; i++) { if (probs[i] > probs[bestIdx]) bestIdx = i; }
+  document.getElementById("result-machine-name").textContent = m.name;
+  var maxProb = Math.max.apply(null, probs);
+  var barsHtml = "";
+  for (var i = 0; i < numSettings; i++) {
+    var pct = probs[i];
+    var barW = maxProb > 0 ? (pct / maxProb * 100) : 0;
+    var isBest = (i === bestIdx);
+    var isFirst = (i === 0);
+    var isLast = (i === numSettings - 1);
+    var barClass = isBest ? "bar-fill bar-best" : (isFirst ? "bar-fill bar-s1" : (isLast ? "bar-fill bar-s6" : "bar-fill bar-s"+settingNums[i]));
+    var pctClass = isBest ? "setting-pct pct-best" : (isFirst ? "setting-pct pct-s1" : (isLast ? "setting-pct pct-s6" : "setting-pct"));
+    barsHtml +=
+      '<div class="setting-row">' +
+      '<span class="setting-check">&#10003;</span>' +
+      '<span class="setting-label">'+settingLabels[i]+'</span>' +
+      '<div class="bar-wrap"><div class="'+barClass+'" style="width:'+barW.toFixed(1)+'%"></div></div>' +
+      '<span class="'+pctClass+'">'+pct.toFixed(3)+' %</span>' +
+      '</div>';
+  }
+  document.getElementById("result-bars").innerHTML = barsHtml;
+  // グループ
+  var groupHtml = "";
+  if (numSettings === 4) {
+    var low2 = probs[0]+probs[1];
+    var high2 = probs[2]+probs[3];
+    var odd2 = probs[0]+probs[2];
+    var even2 = probs[1]+probs[3];
+    groupHtml =
+      '<div class="group-row" style="margin-bottom:6px;">' +
+      '<div class="group-box"><div class="group-title">設定グループ</div><div class="group-label">設定 1 2</div><div class="group-pct low">'+low2.toFixed(3)+' %</div></div>' +
+      '<div class="group-box"><div class="group-title">&nbsp;</div><div class="group-label">設定 5 6</div><div class="group-pct high">'+high2.toFixed(3)+' %</div></div>' +
+      '</div>' +
+      '<div class="group-row">' +
+      '<div class="group-box"><div class="group-title">奇数 / 偶数</div><div class="group-label">奇数設定 (1,5)</div><div class="group-pct odd">'+odd2.toFixed(3)+'%</div></div>' +
+      '<div class="group-box"><div class="group-title">&nbsp;</div><div class="group-label">偶数設定 (2,6)</div><div class="group-pct even">'+even2.toFixed(3)+'%</div></div>' +
+      '</div>';
+  } else if (numSettings === 5) {
+    var low = probs[0]+probs[1]+probs[2];
+    var high = probs[3]+probs[4];
+    var odd = probs[0]+probs[2]+probs[4];
+    var even = probs[1]+probs[3];
+    var lowLabel = settingLabels[0]+' '+settingLabels[1]+' '+settingLabels[2];
+    var highLabel = settingLabels[3]+' '+settingLabels[4];
+    groupHtml =
+      '<div class="group-row" style="margin-bottom:6px;">' +
+      '<div class="group-box"><div class="group-title">設定グループ</div><div class="group-label">'+lowLabel+'</div><div class="group-pct low">'+low.toFixed(3)+' %</div></div>' +
+      '<div class="group-box"><div class="group-title">&nbsp;</div><div class="group-label">'+highLabel+'</div><div class="group-pct high">'+high.toFixed(3)+' %</div></div>' +
+      '</div>' +
+      '<div class="group-row">' +
+      '<div class="group-box"><div class="group-title">奇数 / 偶数</div><div class="group-label">奇数設定 (1,3,V)</div><div class="group-pct odd">'+odd.toFixed(3)+'%</div></div>' +
+      '<div class="group-box"><div class="group-title">&nbsp;</div><div class="group-label">偶数設定 (2,4)</div><div class="group-pct even">'+even.toFixed(3)+'%</div></div>' +
+      '</div>';
+  } else {
+    var low = probs[0]+probs[1]+probs[2];
+    var high = probs[3]+probs[4]+probs[5];
+    var odd = probs[0]+probs[2]+probs[4];
+    var even = probs[1]+probs[3]+probs[5];
+    groupHtml =
+      '<div class="group-row" style="margin-bottom:6px;">' +
+      '<div class="group-box"><div class="group-title">設定グループ</div><div class="group-label">設定 1 2 3</div><div class="group-pct low">'+low.toFixed(3)+' %</div></div>' +
+      '<div class="group-box"><div class="group-title">&nbsp;</div><div class="group-label">設定 4 5 6</div><div class="group-pct high">'+high.toFixed(3)+' %</div></div>' +
+      '</div>' +
+      '<div class="group-row">' +
+      '<div class="group-box"><div class="group-title">奇数 / 偶数</div><div class="group-label">奇数設定</div><div class="group-pct odd">'+odd.toFixed(3)+'%</div></div>' +
+      '<div class="group-box"><div class="group-title">&nbsp;</div><div class="group-label">偶数設定</div><div class="group-pct even">'+even.toFixed(3)+'%</div></div>' +
+      '</div>';
+  }
+  document.getElementById("group-area").innerHTML = groupHtml;
+  // 期待値
+  var expSetting = 0;
+  for (var i = 0; i < numSettings; i++) { expSetting += settingNums[i] * probs[i] / 100; }
+  var expPayout = 0;
+  for (var i = 0; i < numSettings; i++) { expPayout += m.payout[i] * probs[i] / 100; }
+  var g = getSelfGames();
+  var remain = 3000 - g;
+  var coinPerGame = 3;
+  var expCoins = remain > 0 ? Math.round(remain * coinPerGame * (expPayout/100 - 1)) : 0;
+  document.getElementById("ev-area").innerHTML =
+    '<div class="ev-title">期待値</div>' +
+    '<div class="ev-row"><span>期待設定</span><span class="ev-val">'+expSetting.toFixed(2)+'</span></div>' +
+    '<div class="ev-row"><span>期待機械割</span><span class="ev-val">'+expPayout.toFixed(3)+' %</span></div>' +
+    '<div class="ev-row"><span>残り期待枚数 (3000G)</span><span class="ev-val">'+(expCoins>=0?"+":"")+expCoins+' 枚</span></div>';
+  showScreen("result");
+}
+
+// =====================
+// 画面切替
+// =====================
+function showScreen(name) {
+  document.getElementById("counter-screen").style.display = (name==="counter") ? "block" : "none";
+  document.getElementById("result-screen").style.display = (name==="result") ? "block" : "none";
+  document.getElementById("data-screen").style.display = (name==="data") ? "block" : "none";
+  document.getElementById("settings-screen").style.display = (name==="settings") ? "block" : "none";
+  document.getElementById("nav-counter").className = "nav-item" + (name==="counter"?" active":"");
+  document.getElementById("nav-result").className = "nav-item" + (name==="result"?" active":"");
+  document.getElementById("nav-data").className = "nav-item" + (name==="data"?" active":"");
+  document.getElementById("nav-settings").className = "nav-item" + (name==="settings"?" active":"");
+  if (name==="data") buildDataTable();
+}
+
+function buildDataTable() {
+  var m = MACHINES[state.machineId];
+  var numSettings = m.settings.length;
+  var settingNums = m.settingNums || [1,2,3,4,5,6];
+  var settingLabels = m.settingLabels || ["設定1","設定2","設定3","設定4","設定5","設定6"];
+  var html = '<div class="data-table-wrap"><div style="padding:8px 10px;font-size:13px;font-weight:bold;color:#f0a500;">'+m.name+' 確率表</div><table class="data-table"><thead><tr><th>設定</th>';
+  for (var ri = 0; ri < m.roles.length; ri++) {
+    html += '<th>'+m.roleLabels[m.roles[ri]]+'</th>';
+  }
+  html += '<th>機械割</th></tr></thead><tbody>';
+  for (var s = 0; s < numSettings; s++) {
+    html += '<tr><td><b>'+settingLabels[s]+'</b></td>';
+    for (var ri = 0; ri < m.roles.length; ri++) {
+      var role = m.roles[ri];
+      var v = m.settings[s][role];
+      html += '<td>1/'+v+'</td>';
+    }
+    html += '<td>'+m.payout[s]+'%</td></tr>';
+  }
+  html += '</tbody></table></div>';
+  document.getElementById("data-content").innerHTML = html;
+}
+</script>
+</body>
+</html>
