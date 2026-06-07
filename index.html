@@ -496,14 +496,14 @@ var MACHINES = {
     name:"新ハナビ", genre:"normal",
     settingLabels:["設定1","設定2","設定5","設定6"],
     settingNums:[1,2,5,6],
-    roles:["big","reg","furin_a","furin_b","koori_a","cherry_a2","rt_hc","rt_hg"],
-    roleColors:{big:"#e74c3c",reg:"#7f8c8d",furin_a:"#f39c12",furin_b:"#e67e22",koori_a:"#3498db",cherry_a2:"#c0392b",rt_hc:"#9b59b6",rt_hg:"#8e44ad"},
-    roleLabels:{big:"BIG",reg:"REG",furin_a:"風鈴A",furin_b:"風鈴B",koori_a:"氷A",cherry_a2:"チェリーA2",rt_hc:"花火チャレンジ中ハズレ",rt_hg:"花火GAME中ハズレ"},
+    roles:["big","reg","furin","koori_a","cherry_a2","rt_hc","rt_hg"],
+    roleColors:{big:"#e74c3c",reg:"#7f8c8d",furin:"#f39c12",koori_a:"#3498db",cherry_a2:"#c0392b",rt_hc:"#9b59b6",rt_hg:"#8e44ad"},
+    roleLabels:{big:"BIG",reg:"REG",furin:"風鈴合算",koori_a:"氷A",cherry_a2:"チェリーA2",rt_hc:"花火チャレンジ中ハズレ",rt_hg:"花火GAME中ハズレ"},
     settings:[
-      {big:277.7,reg:356.2,furin_a:15.3,furin_b:15.3,koori_a:52.9,cherry_a2:21.0,rt_hc:6.0,rt_hg:13.4},
-      {big:268.6,reg:331.0,furin_a:14.9,furin_b:15.6,koori_a:53.5,cherry_a2:19.3,rt_hc:5.8,rt_hg:12.4},
-      {big:256.0,reg:306.2,furin_a:14.5,furin_b:15.3,koori_a:49.6,cherry_a2:20.6,rt_hc:5.3,rt_hg:10.1},
-      {big:248.2,reg:280.1,furin_a:14.1,furin_b:15.1,koori_a:50.8,cherry_a2:19.9,rt_hc:5.1,rt_hg:9.5}
+      {big:277.7,reg:356.2,furin:7.65,koori_a:52.9,cherry_a2:21.0,rt_hc:6.0,rt_hg:13.4},
+      {big:268.6,reg:331.0,furin:7.62,koori_a:53.5,cherry_a2:19.3,rt_hc:5.8,rt_hg:12.4},
+      {big:256.0,reg:306.2,furin:7.44,koori_a:49.6,cherry_a2:20.6,rt_hc:5.3,rt_hg:10.1},
+      {big:248.2,reg:280.1,furin:7.29,koori_a:50.8,cherry_a2:19.9,rt_hc:5.1,rt_hg:9.5}
     ],
     payout:[102,104,106.5,109]
   },
@@ -826,6 +826,19 @@ var EXTRA_HINTS = {
           {id:"sl_yellow",label:"黄",color:"#f1c40f"},
           {id:"sl_red",label:"赤",color:"#e74c3c"},
           {id:"sl_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      }
+    ]
+  },
+  shin_hanabi: {
+    sections: [
+      {
+        title: "風鈴A/B個別カウント",
+        note: "風鈴A:奇数設定が優遇 / 風鈴B:偶数設定が優遇",
+        type: "lamp",
+        items: [
+          {id:"furin_a",label:"風鈴A",color:"#f39c12"},
+          {id:"furin_b",label:"風鈴B",color:"#e67e22"}
         ]
       }
     ]
