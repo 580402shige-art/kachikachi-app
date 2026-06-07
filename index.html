@@ -112,6 +112,24 @@ body{background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Hi
 /* 戻るボタン */
 .back-btn{background:#252525;color:#f0a500;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;margin-bottom:8px;}
 .back-btn:active{background:#333;}
+/* おまけ推測ポイントエリア */
+.extra-area{background:#1e1e1e;margin:6px 8px;border-radius:10px;border:1px solid #2a2a2a;overflow:hidden;}
+.extra-header{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;padding:10px 12px;cursor:pointer;}
+.extra-header-title{color:#f0a500;font-size:12px;font-weight:bold;}
+.extra-arrow{color:#888;font-size:14px;-webkit-transition:-webkit-transform 0.2s;transition:transform 0.2s;}
+.extra-arrow.open{-webkit-transform:rotate(180deg);transform:rotate(180deg);}
+.extra-body{display:none;padding:0 12px 12px;}
+.extra-body.open{display:block;}
+.extra-section{margin-bottom:10px;}
+.extra-section-title{color:#aaa;font-size:11px;margin-bottom:6px;padding-bottom:4px;border-bottom:1px solid #2a2a2a;}
+.lamp-row{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;margin-bottom:6px;}
+.lamp-label{color:#ccc;font-size:12px;width:36px;text-align:center;}
+.lamp-count{background:#2a2a2a;color:#fff;border:1px solid #333;text-align:center;font-size:14px;font-weight:bold;width:44px;padding:4px 6px;border-radius:6px;margin:0 4px;}
+.lamp-btn{background:#2a2a2a;color:#fff;border:1px solid #444;width:28px;height:28px;border-radius:6px;font-size:16px;cursor:pointer;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;}
+.lamp-btn:active{background:#444;}
+.lamp-btn.plus{background:#f0a500;color:#000;border-color:#f0a500;}
+.lamp-dot{width:14px;height:14px;border-radius:50%;margin-right:6px;display:inline-block;}
+.extra-note{color:#666;font-size:10px;margin-top:4px;line-height:1.4;}
 /* 設定画面 */
 .settings-screen{display:none;padding:8px;}
 .settings-section{background:#1e1e1e;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #2a2a2a;}
@@ -194,6 +212,15 @@ body{background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Hi
   <div class="roles-area">
     <div class="roles-title">小役カウント</div>
     <div class="roles-grid" id="roles-grid"></div>
+  </div>
+
+  <!-- おまけ推測ポイント -->
+  <div id="extra-area" class="extra-area" style="display:none;">
+    <div class="extra-header" onclick="toggleExtra()">
+      <span class="extra-header-title">▼ おまけ推測ポイント</span>
+      <span class="extra-arrow" id="extra-arrow">▼</span>
+    </div>
+    <div class="extra-body" id="extra-body"></div>
   </div>
 
   <!-- 判別ボタン -->
@@ -550,6 +577,7 @@ var state = {
   startGames: 0,
   totalGames: 0,
   counts: {},
+  extraCounts: {},
   subMode: false
 };
 
@@ -579,13 +607,16 @@ window.onload = function() {
   }
   updateSelf();
   buildRoleCards();
+  buildExtraHints();
 };
 
 function onMachineChange() {
   state.machineId = document.getElementById("machine-select").value;
   state.counts = {};
+  state.extraCounts = {};
   saveState();
   buildRoleCards();
+  buildExtraHints();
   document.getElementById("header-title").textContent = MACHINES[state.machineId].name;
 }
 
@@ -664,6 +695,265 @@ function openDirectInput(role) {
   }
 }
 
+// =====================
+// おまけ推測ポイント
+// =====================
+var EXTRA_HINTS = {
+  s_king_hana: {
+    sections: [
+      {
+        title: "BIG中サイドランプ",
+        note: "奇数:寒色(\u9752+\u7dd1)多 / 偶数:暖色(\u9ec4+\u8d64)多 / 設定6:均等",
+        type: "lamp",
+        items: [
+          {id:"sl_blue",label:"青",color:"#3498db"},
+          {id:"sl_green",label:"緑",color:"#27ae60"},
+          {id:"sl_yellow",label:"黄",color:"#f1c40f"},
+          {id:"sl_red",label:"赤",color:"#e74c3c"},
+          {id:"sl_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      },
+      {
+        title: "BIG後フェザーランプ",
+        note: "白以外が出るほど高設定期待度UP",
+        type: "lamp",
+        items: [
+          {id:"bf_white",label:"白",color:"#ccc"},
+          {id:"bf_blue",label:"青",color:"#3498db"},
+          {id:"bf_yellow",label:"黄",color:"#f1c40f"},
+          {id:"bf_green",label:"緑",color:"#27ae60"},
+          {id:"bf_red",label:"赤",color:"#e74c3c"},
+          {id:"bf_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      },
+      {
+        title: "REG後フェザーランプ",
+        note: "青:設定2以上 / 黄:設定3以上 / 緑:設定4以上 / 赤:設定5以上 / 虹:設定6確定",
+        type: "lamp",
+        items: [
+          {id:"rf_white",label:"白",color:"#ccc"},
+          {id:"rf_blue",label:"青",color:"#3498db"},
+          {id:"rf_yellow",label:"黄",color:"#f1c40f"},
+          {id:"rf_green",label:"緑",color:"#27ae60"},
+          {id:"rf_red",label:"赤",color:"#e74c3c"},
+          {id:"rf_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      }
+    ]
+  },
+  newking_v: {
+    sections: [
+      {
+        title: "BB後半サイドランプ",
+        note: "奇数:寒色(青+緑)多 / 偶数:暖色(黄+赤)多 / 虹:期待度急上昇",
+        type: "lamp",
+        items: [
+          {id:"sl_blue",label:"青",color:"#3498db"},
+          {id:"sl_green",label:"緑",color:"#27ae60"},
+          {id:"sl_yellow",label:"黄",color:"#f1c40f"},
+          {id:"sl_red",label:"赤",color:"#e74c3c"},
+          {id:"sl_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      },
+      {
+        title: "BB後ハイビスカスランプ",
+        note: "白以外が出るほど高設定期待度UP / 虹が最高",
+        type: "lamp",
+        items: [
+          {id:"bf_white",label:"白",color:"#ccc"},
+          {id:"bf_blue",label:"青",color:"#3498db"},
+          {id:"bf_yellow",label:"黄",color:"#f1c40f"},
+          {id:"bf_green",label:"緑",color:"#27ae60"},
+          {id:"bf_purple",label:"紫",color:"#9b59b6"},
+          {id:"bf_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      },
+      {
+        title: "RB後ハイビスカスランプ",
+        note: "白以外が出れば高設定期待度UP",
+        type: "lamp",
+        items: [
+          {id:"rf_white",label:"白",color:"#ccc"},
+          {id:"rf_blue",label:"青",color:"#3498db"},
+          {id:"rf_yellow",label:"黄",color:"#f1c40f"},
+          {id:"rf_green",label:"緑",color:"#27ae60"},
+          {id:"rf_purple",label:"紫",color:"#9b59b6"}
+        ]
+      }
+    ]
+  },
+  dragon_hana: {
+    sections: [
+      {
+        title: "BIG中サイドランプ",
+        note: "奇数:寒色多 / 偶数:暖色多",
+        type: "lamp",
+        items: [
+          {id:"sl_blue",label:"青",color:"#3498db"},
+          {id:"sl_green",label:"緑",color:"#27ae60"},
+          {id:"sl_yellow",label:"黄",color:"#f1c40f"},
+          {id:"sl_red",label:"赤",color:"#e74c3c"},
+          {id:"sl_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      }
+    ]
+  },
+  houou_tensho: {
+    sections: [
+      {
+        title: "BIG中サイドランプ",
+        note: "奇数:寒色多 / 偶数:暖色多",
+        type: "lamp",
+        items: [
+          {id:"sl_blue",label:"青",color:"#3498db"},
+          {id:"sl_green",label:"緑",color:"#27ae60"},
+          {id:"sl_yellow",label:"黄",color:"#f1c40f"},
+          {id:"sl_red",label:"赤",color:"#e74c3c"},
+          {id:"sl_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      }
+    ]
+  },
+  star_hana: {
+    sections: [
+      {
+        title: "BIG中サイドランプ",
+        note: "奇数:寒色多 / 偶数:暖色多",
+        type: "lamp",
+        items: [
+          {id:"sl_blue",label:"青",color:"#3498db"},
+          {id:"sl_green",label:"緑",color:"#27ae60"},
+          {id:"sl_yellow",label:"黄",color:"#f1c40f"},
+          {id:"sl_red",label:"赤",color:"#e74c3c"},
+          {id:"sl_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"}
+        ]
+      }
+    ]
+  },
+  s_hanabi: {
+    sections: [
+      {
+        title: "REG終了画面",
+        note: "ピースマーク出現 = 設定2以上濃厚",
+        type: "lamp",
+        items: [
+          {id:"peace",label:"✔",color:"#27ae60"}
+        ]
+      }
+    ]
+  },
+  versus_revise: {
+    sections: [
+      {
+        title: "RB終了画面",
+        note: "END文字/帯が赤色 = 設定2以上確定",
+        type: "lamp",
+        items: [
+          {id:"end_red",label:"赤END",color:"#e74c3c"}
+        ]
+      },
+      {
+        title: "REG中3連X図柄ハズレ",
+        note: "出現 = 設定5以上確定",
+        type: "lamp",
+        items: [
+          {id:"x_hazure",label:"✔",color:"#9b59b6"}
+        ]
+      }
+    ]
+  },
+  discup2: {
+    sections: [
+      {
+        title: "サミートロフィー",
+        note: "銅:設定2以上 / キリン:設定5以上 / 虹:設定6濃厚",
+        type: "lamp",
+        items: [
+          {id:"trophy_bronze",label:"銅",color:"#cd7f32"},
+          {id:"trophy_kirin",label:"キリン",color:"#daa520"},
+          {id:"trophy_rainbow",label:"虹",color:"linear-gradient(90deg,#e74c3c,#f39c12,#f1c40f,#27ae60,#3498db,#9b59b6)"},
+          {id:"trophy_black",label:"黒",color:"#333"}
+        ]
+      }
+    ]
+  }
+};
+
+function toggleExtra() {
+  var body = document.getElementById("extra-body");
+  var arrow = document.getElementById("extra-arrow");
+  if (body.className.indexOf("open") >= 0) {
+    body.className = "extra-body";
+    arrow.className = "extra-arrow";
+  } else {
+    body.className = "extra-body open";
+    arrow.className = "extra-arrow open";
+  }
+}
+
+function buildExtraHints() {
+  var m = MACHINES[state.machineId];
+  var hints = EXTRA_HINTS[state.machineId];
+  var area = document.getElementById("extra-area");
+  var body = document.getElementById("extra-body");
+  if (!hints) {
+    area.style.display = "none";
+    return;
+  }
+  area.style.display = "block";
+  var html = "";
+  for (var si = 0; si < hints.sections.length; si++) {
+    var sec = hints.sections[si];
+    html += '<div class="extra-section">';
+    html += '<div class="extra-section-title">' + sec.title + '</div>';
+    for (var ii = 0; ii < sec.items.length; ii++) {
+      var item = sec.items[ii];
+      var cnt = (state.extraCounts && state.extraCounts[item.id]) || 0;
+      var dotStyle = item.color.indexOf("gradient") >= 0 ? 'background:'+item.color : 'background:'+item.color;
+      html += '<div class="lamp-row">';
+      html += '<span class="lamp-dot" style="'+dotStyle+'"></span>';
+      html += '<span class="lamp-label">' + item.label + '</span>';
+      html += '<button class="lamp-btn" onclick="extraSub(\''+item.id+'\')">&minus;</button>';
+      html += '<span class="lamp-count" onclick="extraDirectInput(\''+item.id+'\',\''+item.label+'\')">' + cnt + '</span>';
+      html += '<button class="lamp-btn plus" onclick="extraAdd(\''+item.id+'\')">&plus;</button>';
+      html += '</div>';
+    }
+    if (sec.note) {
+      html += '<div class="extra-note">' + sec.note + '</div>';
+    }
+    html += '</div>';
+  }
+  body.innerHTML = html;
+}
+
+function extraAdd(id) {
+  if (!state.extraCounts) state.extraCounts = {};
+  state.extraCounts[id] = (state.extraCounts[id] || 0) + 1;
+  saveState();
+  buildExtraHints();
+}
+function extraSub(id) {
+  if (!state.extraCounts) state.extraCounts = {};
+  if ((state.extraCounts[id] || 0) > 0) {
+    state.extraCounts[id]--;
+    saveState();
+    buildExtraHints();
+  }
+}
+function extraDirectInput(id, label) {
+  var cnt = (state.extraCounts && state.extraCounts[id]) || 0;
+  var val = prompt(label + ' のカウントを入力', cnt);
+  if (val !== null && val !== '') {
+    var n = parseInt(val);
+    if (!isNaN(n) && n >= 0) {
+      if (!state.extraCounts) state.extraCounts = {};
+      state.extraCounts[id] = n;
+      saveState();
+      buildExtraHints();
+    }
+  }
+}
+
 function onCardTap(role) {
   if (state.subMode) {
     subCount(role);
@@ -687,13 +977,16 @@ function subCount(role) {
 function resetCounts() {
   if (confirm("カウントをリセットしますか？")) {
     state.counts = {};
+    state.extraCounts = {};
     saveState();
     buildRoleCards();
+    buildExtraHints();
   }
 }
 function resetAll() {
   if (confirm("全データをリセットしますか？")) {
     state.counts = {};
+    state.extraCounts = {};
     state.startGames = 0;
     state.totalGames = 0;
     document.getElementById("start-games").value = 0;
@@ -701,6 +994,7 @@ function resetAll() {
     updateSelf();
     saveState();
     buildRoleCards();
+    buildExtraHints();
   }
 }
 
