@@ -6,6 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="カチカチくん">
+<meta name="robots" content="noindex, nofollow">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -138,9 +139,28 @@ body{background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Hi
 .settings-section{background:#1e1e1e;border-radius:10px;padding:12px;margin-bottom:8px;border:1px solid #2a2a2a;}
 .settings-title{color:#f0a500;font-size:13px;font-weight:bold;margin-bottom:8px;}
 .settings-info{color:#888;font-size:12px;line-height:1.6;}
+/* パスワード画面 */
+.pw-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:#111;z-index:9999;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;}
+.pw-box{background:#1e1e1e;border:1px solid #2a2a2a;border-radius:12px;padding:30px 24px;text-align:center;width:280px;}
+.pw-box h2{color:#f0a500;font-size:18px;margin-bottom:16px;}
+.pw-box input{width:100%;background:#2a2a2a;color:#fff;border:1px solid #333;padding:12px;font-size:16px;border-radius:8px;text-align:center;margin-bottom:12px;}
+.pw-box button{width:100%;background:#f0a500;color:#111;border:none;padding:12px;font-size:15px;font-weight:bold;border-radius:8px;cursor:pointer;}
+.pw-box button:active{background:#d4940a;}
+.pw-error{color:#e74c3c;font-size:12px;margin-top:8px;display:none;}
 </style>
 </head>
 <body>
+
+<!-- パスワード画面 -->
+<div class="pw-overlay" id="pw-overlay">
+  <div class="pw-box">
+    <h2>カチカチくん</h2>
+    <p style="color:#999;font-size:12px;margin-bottom:16px;">パスワードを入力してください</p>
+    <input type="password" id="pw-input" placeholder="パスワード" autocomplete="off">
+    <button onclick="checkPw()">ログイン</button>
+    <div class="pw-error" id="pw-error">パスワードが違います</div>
+  </div>
+</div>
 
 <!-- ヘッダー -->
 <div class="header">
@@ -295,6 +315,42 @@ body{background:#111;color:#fff;font-family:-apple-system,BlinkMacSystemFont,'Hi
 </div>
 
 <script>
+// =====================
+// パスワード保護
+// =====================
+var PW_KEY = 'kachikachi_auth';
+var PW_HASH = '6b746b'; // 簡易ハッシュ
+function simpleHash(s) {
+  var h = '';
+  for (var i = 0; i < s.length; i++) h += s.charCodeAt(i).toString(16);
+  return h;
+}
+function checkPw() {
+  var input = document.getElementById('pw-input').value;
+  if (simpleHash(input) === PW_HASH) {
+    localStorage.setItem(PW_KEY, 'ok');
+    document.getElementById('pw-overlay').style.display = 'none';
+    document.getElementById('pw-error').style.display = 'none';
+  } else {
+    document.getElementById('pw-error').style.display = 'block';
+  }
+}
+function checkAuth() {
+  if (localStorage.getItem(PW_KEY) === 'ok') {
+    document.getElementById('pw-overlay').style.display = 'none';
+  }
+}
+// Enterキーでログイン
+document.addEventListener('DOMContentLoaded', function() {
+  checkAuth();
+  var pwInput = document.getElementById('pw-input');
+  if (pwInput) {
+    pwInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') checkPw();
+    });
+  }
+});
+
 // =====================
 // 機種データ（kenslo65536.com より）
 // =====================
