@@ -37,3 +37,33 @@ roblox-horse-game/
 - BGM/効果音
 - ガチャ的な新馬購入・コイン獲得手段(現状はコインは配合コストなどに未使用。経済設計は今後の拡張ポイント)
 - レース距離・着順に応じたコイン報酬などの経済ループ
+
+## 馬の3Dモデル (Blender, `blender/`)
+
+`blender/generate_horse.py` は、Blenderの Python API(`bpy`)でプリミティブ(箱・円錐)を
+組み立ててローポリ調の馬メッシュを作り、GLB/FBXに書き出すヘッドレススクリプトです。
+
+**注意**: この開発環境にはBlenderがインストールされておらず、実行・目視確認はできていません。
+形状は三角関数で近似配置した見込み値なので、書き出し後にBlenderで開いて
+プロポーションがおかしければスクリプト冒頭の定数(`NECK_ANGLE_DEG`など)を調整し、再実行してください。
+
+### 実行方法(あなたのPCで)
+
+```bash
+blender --background --python blender/generate_horse.py -- \
+  --output blender/output --name LowPolyHorse \
+  --coat 0.55,0.32,0.18 --mane 0.16,0.09,0.05
+```
+
+- `--coat` / `--mane` はR,G,B(0〜1)。父馬・母馬・子馬で色違いを作りたい場合は
+  この値を変えて複数回実行すればOKです。
+- 出力は `blender/output/LowPolyHorse.glb` と `.fbx`。
+
+### Roblox Studioへの取り込み
+
+1. Studioで `Insert` → `Mesh` (または新しい3D Importer)から `.fbx` か `.glb` を選択してインポート。
+2. インポートされた MeshPart を厩舎シーンやレースコースに配置。
+3. 必要であればスケール調整(Blender側は1ユニット=1メートル換算で作っています)。
+
+アニメーション(走る・待機モーション)は含まれていません。将来的にRigify等でリグを組み、
+Robloxの Animation Editor で走行モーションを作る必要があります。
